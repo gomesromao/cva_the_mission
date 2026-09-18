@@ -67,9 +67,12 @@ variable and redeploy; everyone's saved cookie stops working immediately.
 On phones and tablets an on-screen pad appears instead, and the prompt reads A
 rather than ENTER. The gramophone in the living room toggles the music too.
 
-Anything you can interact with twinkles at its corners, and the one you are
-facing shows an ENTER tag. The twinkle stops once you have read that thing, so
-the marks also show what you have not found yet.
+Whatever you need to do next carries comic-style emphasis marks the whole time,
+so there is always somewhere to head for. Everything else takes a turn: one
+unread object at a time is marked, more faintly, for five to ten seconds before
+the marks move on. Walk up to anything marked and an ENTER tag appears above it.
+Once you have read something it stops being picked, so the marks quietly track
+what you have not found.
 
 ## Layout
 

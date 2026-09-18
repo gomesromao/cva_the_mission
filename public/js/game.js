@@ -271,6 +271,7 @@
     player.x = s.x; player.y = s.y; player.dir = s.dir;
     player.px = s.x * TILE; player.py = s.y * TILE;
     player.moving = false; player.t = 0;
+    hintPick = null; // the old room's pick means nothing here
     updateCamera();
   }
 
@@ -530,26 +531,71 @@
     }
   }
 
-  // Twinkling corner marks on anything worth pressing ENTER at. They go quiet
-  // once you have read that thing, so the marks double as a record of what you
-  // have not found yet.
-  function drawSparkle(x, y) {
-    const arm = 3;
-    const c = 2;
-    const right = x + TILE - 1;
-    const bottom = y + TILE - 1;
+  // Comic-book emphasis marks: short strokes radiating off the object, the way
+  // a strip draws something as moving or worth looking at. Cardinals and
+  // diagonals alternate, which reads as a vibration rather than a static frame.
+  function drawTicks(x, y, colorIndex, len, strong) {
+    const c = palette[colorIndex];
+    const cx = x + TILE / 2;
+    const cy = y + TILE / 2;
+    const gap = 2;
+    const right = x + TILE;
+    const bottom = y + TILE;
+    const phase = (frame >> (strong ? 3 : 4)) & 1;
 
-    if (((frame >> 4) & 1) === 0) {
-      fillRect(x, y, arm, 1, c);
-      fillRect(x, y, 1, arm, c);
-      fillRect(right - arm + 1, bottom, arm, 1, c);
-      fillRect(right, bottom - arm + 1, 1, arm, c);
-    } else {
-      fillRect(right - arm + 1, y, arm, 1, c);
-      fillRect(right, y, 1, arm, c);
-      fillRect(x, bottom, arm, 1, c);
-      fillRect(x, bottom - arm + 1, 1, arm, c);
+    function dot(px, py) {
+      if (px < 0 || px >= W || py < 0 || py >= H) return;
+      pixels[py * W + px] = c;
     }
+
+    function cardinals(l) {
+      fillRect(cx - 1, y - gap - l, 2, l, colorIndex);
+      fillRect(cx - 1, bottom + gap, 2, l, colorIndex);
+      fillRect(x - gap - l, cy - 1, l, 2, colorIndex);
+      fillRect(right + gap, cy - 1, l, 2, colorIndex);
+    }
+
+    function diagonals(l) {
+      for (let i = 0; i < l; i++) {
+        dot(x - gap - i, y - gap - i);
+        dot(right + gap + i, y - gap - i);
+        dot(x - gap - i, bottom + gap + i);
+        dot(right + gap + i, bottom + gap + i);
+      }
+    }
+
+    if (strong) {
+      // The objective is never unmarked; it pulses between short and long.
+      cardinals(phase ? len : len - 2);
+      if (phase) diagonals(len - 1);
+    } else if (phase) {
+      cardinals(len);
+    } else {
+      diagonals(len);
+    }
+  }
+
+  // One thing at a time. The objective ticks constantly and louder; everything
+  // else takes a turn for five to ten seconds so the screen never fills up.
+  let hintPick = null;
+  let hintUntil = 0;
+
+  function currentObjective() {
+    if (currentMapId === 'office') return flags.hasMessage ? '8,7' : '6,3';
+    if (currentMapId === 'house') return '7,10';
+    return null;
+  }
+
+  function rotateHint() {
+    const objective = currentObjective();
+    const pool = [];
+    for (const key in map.interact) {
+      if (key === objective) continue;
+      if (flags.seen[currentMapId + ':' + key]) continue;
+      pool.push(key);
+    }
+    hintPick = pool.length ? pool[(Math.random() * pool.length) | 0] : null;
+    hintUntil = frame + 300 + ((Math.random() * 300) | 0); // 5s to 10s at 60fps
   }
 
   function drawPrompt(x, y) {
@@ -566,25 +612,41 @@
     drawText(label, px + 4, py + 2, 3);
   }
 
+  function tileScreenPos(key) {
+    const parts = key.split(',');
+    return {
+      x: (+parts[0]) * TILE - camX,
+      y: (+parts[1]) * TILE - camY + (map.hintDy[key] || 0),
+    };
+  }
+
+  function onScreen(p) {
+    return p.x > -TILE && p.x < W && p.y > -TILE && p.y < H;
+  }
+
   function renderInteractHints() {
     const facing = DELTA[player.dir];
     const facingKey = (player.x + facing[0]) + ',' + (player.y + facing[1]);
 
-    for (const key in map.interact) {
-      if (flags.seen[currentMapId + ':' + key]) continue;
-      const parts = key.split(',');
-      const sx = (+parts[0]) * TILE - camX;
-      const sy = (+parts[1]) * TILE - camY + (map.hintDy[key] || 0);
-      if (sx <= -TILE || sx >= W || sy <= -TILE || sy >= H) continue;
-      drawSparkle(sx, sy);
+    if (hintPick === null || frame > hintUntil ||
+        flags.seen[currentMapId + ':' + hintPick] || !map.interact[hintPick]) {
+      rotateHint();
+    }
+
+    const objective = currentObjective();
+    if (objective && map.interact[objective]) {
+      const p = tileScreenPos(objective);
+      if (onScreen(p)) drawTicks(p.x, p.y, 3, 5, true);
+    }
+
+    if (hintPick) {
+      const p = tileScreenPos(hintPick);
+      if (onScreen(p)) drawTicks(p.x, p.y, 2, 3, false);
     }
 
     if (map.interact[facingKey]) {
-      const parts = facingKey.split(',');
-      drawPrompt(
-        (+parts[0]) * TILE - camX,
-        (+parts[1]) * TILE - camY + (map.hintDy[facingKey] || 0)
-      );
+      const p = tileScreenPos(facingKey);
+      drawPrompt(p.x, p.y);
     }
   }
 
