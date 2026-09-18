@@ -545,6 +545,8 @@
     const overlay = document.getElementById('ending');
     overlay.classList.add('visible');
     document.getElementById('cta').setAttribute('href', BOOK_A_CALL_URL);
+    // The button just claimed vertical space; give the canvas its share back.
+    fitScreen();
   }
 
   function renderEnding() {
@@ -596,12 +598,28 @@
 
   // ------------------------------------------------------------------- setup
 
+  // Measures what the pad, the bar and the ending button actually take up
+  // rather than guessing a fraction of the viewport, so the controls can never
+  // be pushed off the bottom of a phone.
   function fitScreen() {
-    const pad = isTouch ? 0 : 16;
-    const availW = window.innerWidth - pad;
-    const availH = (isTouch ? window.innerHeight * 0.58 : window.innerHeight - pad);
-    let scale = Math.floor(Math.min(availW / W, availH / H));
-    if (scale < 1) scale = Math.min(availW / W, availH / H);
+    canvas.style.width = '0px';
+    canvas.style.height = '0px';
+
+    let used = 32; // body padding plus the gaps between rows
+    ['controls', 'bar', 'ending'].forEach(function (id) {
+      const el = document.getElementById(id);
+      if (el) used += el.offsetHeight;
+    });
+
+    const availW = window.innerWidth - 16;
+    const availH = window.innerHeight - used;
+
+    let scale = Math.min(availW / W, availH / H);
+    // Whole-number scaling keeps the pixels square; only go fractional when
+    // there is not even room for 1:1.
+    if (scale >= 1) scale = Math.floor(scale);
+    if (scale <= 0) scale = Math.max(0.5, Math.min(availW / W, availH / H));
+
     canvas.style.width = Math.floor(W * scale) + 'px';
     canvas.style.height = Math.floor(H * scale) + 'px';
   }
@@ -617,7 +635,10 @@
       return;
     }
 
-    isTouch = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    // pointer:coarse is the honest test for a phone. A touchscreen laptop still
+    // has a keyboard, and should keep the keyboard hint instead of a d-pad.
+    isTouch = (window.matchMedia && window.matchMedia('(pointer: coarse)').matches) ||
+      (!window.matchMedia && 'ontouchstart' in window);
     if (isTouch) document.body.classList.add('touch');
 
     applyPalette('cozy');
