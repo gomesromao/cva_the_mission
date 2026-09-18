@@ -149,6 +149,33 @@ function buildCollision(map) {
   return blocked;
 }
 
+// Wall decorations are drawn higher than the tile you interact with, so the
+// twinkle marks need to know where the thing actually appears on screen.
+function buildHintOffsets(map) {
+  const offsets = Object.create(null);
+
+  (map.objects || []).forEach(function (o) {
+    const key = o.x + ',' + o.y;
+    const dy = o.dy || 0;
+    if (offsets[key] === undefined || dy < offsets[key]) offsets[key] = dy;
+  });
+
+  (map.decals || []).forEach(function (d) {
+    const rows = DECALS[d.t];
+    const tilesW = Math.ceil(rows[0].length / TILE);
+    const tilesH = Math.ceil(rows.length / TILE);
+    for (let ty = 0; ty < tilesH; ty++) {
+      for (let tx = 0; tx < tilesW; tx++) {
+        const key = (d.x + tx) + ',' + (d.y + ty);
+        const dy = d.dy || 0;
+        if (offsets[key] === undefined || dy < offsets[key]) offsets[key] = dy;
+      }
+    }
+  });
+
+  return offsets;
+}
+
 function validateMaps() {
   const problems = [];
   for (const id in MAPS) {
@@ -169,6 +196,7 @@ function validateMaps() {
     map.width = w;
     map.height = map.ground.length;
     map.blocked = buildCollision(map);
+    map.hintDy = buildHintOffsets(map);
   }
   return problems;
 }

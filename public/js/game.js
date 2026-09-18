@@ -530,6 +530,64 @@
     }
   }
 
+  // Twinkling corner marks on anything worth pressing ENTER at. They go quiet
+  // once you have read that thing, so the marks double as a record of what you
+  // have not found yet.
+  function drawSparkle(x, y) {
+    const arm = 3;
+    const c = 2;
+    const right = x + TILE - 1;
+    const bottom = y + TILE - 1;
+
+    if (((frame >> 4) & 1) === 0) {
+      fillRect(x, y, arm, 1, c);
+      fillRect(x, y, 1, arm, c);
+      fillRect(right - arm + 1, bottom, arm, 1, c);
+      fillRect(right, bottom - arm + 1, 1, arm, c);
+    } else {
+      fillRect(right - arm + 1, y, arm, 1, c);
+      fillRect(right, y, 1, arm, c);
+      fillRect(x, bottom, arm, 1, c);
+      fillRect(x, bottom - arm + 1, 1, arm, c);
+    }
+  }
+
+  function drawPrompt(x, y) {
+    const label = isTouch ? 'A' : 'ENTER';
+    const w = textWidth(label) + 7;
+    let px = Math.round(x + TILE / 2 - w / 2);
+    let py = y - 12;
+    px = Math.max(1, Math.min(W - w - 1, px));
+    // If there is no room above the object, hang the tag underneath instead.
+    if (py < 1) py = y + TILE + 2;
+
+    fillRect(px, py, w, 11, 3);
+    fillRect(px + 1, py + 1, w - 2, 9, 0);
+    drawText(label, px + 4, py + 2, 3);
+  }
+
+  function renderInteractHints() {
+    const facing = DELTA[player.dir];
+    const facingKey = (player.x + facing[0]) + ',' + (player.y + facing[1]);
+
+    for (const key in map.interact) {
+      if (flags.seen[currentMapId + ':' + key]) continue;
+      const parts = key.split(',');
+      const sx = (+parts[0]) * TILE - camX;
+      const sy = (+parts[1]) * TILE - camY + (map.hintDy[key] || 0);
+      if (sx <= -TILE || sx >= W || sy <= -TILE || sy >= H) continue;
+      drawSparkle(sx, sy);
+    }
+
+    if (map.interact[facingKey]) {
+      const parts = facingKey.split(',');
+      drawPrompt(
+        (+parts[0]) * TILE - camX,
+        (+parts[1]) * TILE - camY + (map.hintDy[facingKey] || 0)
+      );
+    }
+  }
+
   function renderBox(top, height) {
     fillRect(0, top, W, height, 3);
     fillRect(2, top + 2, W - 4, height - 4, 0);
@@ -685,6 +743,7 @@
       else if (mode === 'fadeout') updateFade();
 
       renderMap();
+      if (mode === 'play' && fadeLevel === 0) renderInteractHints();
       // The fade hides the world, but never the words on top of it.
       if (fadeLevel > 0) ditherOver(fadeLevel, 0);
       if (mode === 'dialogue') renderDialogue();

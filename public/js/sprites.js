@@ -735,11 +735,13 @@ const DECALS = {
 // The house ramp is the brand's own gradient, mint down to the navy the logo
 // is drawn in, taken from the Coconut design tokens rather than eyeballed.
 // cv-green-100 / cv-green-500 / cv-navy-500 / cv-navy-900.
-// Tone 3 is the navy the logo is drawn in; the steps above it are spaced by
-// brightness rather than by picking tokens straight off the ladder, because
-// two adjacent brand greens would collapse into one flat shape on screen.
+// Blue outside, green inside: the navy stays on the page around the screen
+// while the game itself runs light green through teal, so both brand colours
+// are present. Steps are spaced by brightness rather than lifted straight off
+// the token ladder, because two adjacent brand greens collapse into one flat
+// shape at this size.
 const PALETTES = {
-  coconut: ['#eaf5ee', '#8fd3b2', '#3f7f8c', '#07152b'],
+  coconut: ['#edfaf1', '#93d9b4', '#2f8f8c', '#0a2e33'],
   dmg: ['#e0f8d0', '#88c070', '#346856', '#081820'],
   cozy: ['#f4e7c8', '#cba36c', '#7d5636', '#2a1a12'],
 };

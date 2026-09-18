@@ -64,8 +64,12 @@ variable and redeploy; everyone's saved cookie stops working immediately.
 | M | music on/off |
 | P | cycle palette (Coconut / classic green / warm) |
 
-On phones and tablets an on-screen pad appears instead. The gramophone in the
-living room toggles the music too.
+On phones and tablets an on-screen pad appears instead, and the prompt reads A
+rather than ENTER. The gramophone in the living room toggles the music too.
+
+Anything you can interact with twinkles at its corners, and the one you are
+facing shows an ENTER tag. The twinkle stops once you have read that thing, so
+the marks also show what you have not found yet.
 
 ## Layout
 
