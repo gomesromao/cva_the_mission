@@ -6,9 +6,18 @@ place. It runs about two and a half minutes straight through, with more to find
 if you wander.
 
 Everything renders into a 160x144 pixel buffer, the real Game Boy resolution,
-scaled up by whole numbers. No engine, no build step, no third-party art or
-audio: the tiles, the character, the font and the music are all authored in this
-repo as data.
+scaled up by whole numbers. No engine and no build step. The tiles, the
+character, the font and the boot chime are authored in this repo as data; the
+only binary asset is the theme.
+
+It opens the way the handheld did: press to power on, the Coconut mark slides
+down the screen, it rings, and then the title. The mark is converted straight
+from the brand PNG rather than redrawn by eye.
+
+**Music:** `public/audio/theme.mp3` is *Midnight Pixel Path* by gomesromao, the
+first 63 seconds of the original, before the vocal comes in. It is looped with a
+crossfade rather than with `loop=true`, because its tail sits about 12dB below
+its head and butting the two together puts an audible jump every lap.
 
 ## Running it locally
 
@@ -65,6 +74,7 @@ public/
   index.html        game shell
   login.html        password page (the only ungated page)
   style.css         page chrome and the touch controls
+  audio/theme.mp3   the looping theme
   js/font.js        8x8 bitmap font, authored as hex
   js/sprites.js     tiles, the walking character, the big decals, palettes
   js/maps.js        the two rooms: layout, collision, what is interactive

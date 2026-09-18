@@ -134,6 +134,29 @@ const SCRIPT = {
     'A coconut. On the floor. Inside your house.',
     'You decide not to ask.',
   ],
+  windowHouse: [
+    'The window down here looks out at the same night as the one upstairs.',
+    'From down here it looks like weather. From up there it looked like a deadline.',
+  ],
+  clockHouse: [
+    'A clock down here too. Same time as the one on your office wall.',
+    'It feels later up there. It always does.',
+  ],
+  warmCoffee: [
+    'A second cup, still warm.',
+    'Somebody made this while you were upstairs not drinking the first one.',
+  ],
+  trialCard: [
+    'A card propped inside the frame, handwritten:',
+    '"First 40 hours are free. Month to month. No long contracts."',
+    '"We would rather you leave easily than stay somewhere stuck."',
+  ],
+  shelfRoles: [
+    'A shelf of binders, one per job.',
+    'Executive assistants. Digital marketers. Social media. Sales. Accounting.',
+    'Front end, back end, full stack. Automation and AI. Designers.',
+    'Every one of them is something you have been doing yourself at midnight.',
+  ],
 
   // --------------------------------------------------------------- the door
   doorPrompt: [

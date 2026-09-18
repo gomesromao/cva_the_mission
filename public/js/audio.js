@@ -1,46 +1,28 @@
-// A tiny two-voice chiptune loop built with oscillators, so there is no audio
-// file to download and nothing to license.
+// Music and sound.
 //
-// Safari will not let an AudioContext start outside a user gesture, so the
-// context is created lazily on the first key press or tap and resumed there too.
+// The theme is a real track loaded once and looped with a crossfade rather than
+// with loop=true: its tail is around 12dB quieter than its head, so butting the
+// two together would put an audible jump every lap. Overlapping them hides it.
+//
+// Safari will not let an AudioContext exist outside a user gesture, so the
+// context is created on the first key press or tap and resumed there too.
 
 const Music = (function () {
-  const BPM = 92;
-  const STEP = 60 / BPM / 2; // one eighth note
-  const LOOKAHEAD = 0.25;
-
-  // Semitone offsets from A4 = 440.
-  const NOTES = {
-    'C3': -21, 'D3': -19, 'E3': -17, 'F3': -16, 'G3': -14, 'A3': -12, 'B3': -10,
-    'C4': -9, 'D4': -7, 'E4': -5, 'F4': -4, 'G4': -2, 'A4': 0, 'B4': 2,
-    'C5': 3, 'D5': 5, 'E5': 7, 'F5': 8, 'G5': 10,
-    'F2': -28, 'G2': -26, 'A2': -24, 'C2': -33,
-  };
-
-  const LEAD = [
-    'E4', 'G4', 'C5', null, 'B4', null, 'A4', null,
-    'G4', 'E4', 'G4', null, 'C5', null, null, null,
-    'D5', 'C5', 'B4', null, 'A4', null, 'G4', null,
-    'E4', 'D4', 'E4', null, 'C4', null, null, null,
-  ];
-
-  const BASS = [
-    'C3', null, null, null, 'G2', null, null, null,
-    'A2', null, null, null, 'F2', null, null, null,
-    'C3', null, null, null, 'G2', null, null, null,
-    'F2', null, null, null, 'G2', null, null, null,
-  ];
+  const THEME_URL = 'audio/theme.mp3';
+  const OVERLAP = 2.0;      // seconds of crossfade at the seam
+  const VOLUME = 0.55;
+  const SCHEDULE_AHEAD = 4; // seconds
 
   let ctx = null;
   let master = null;
-  let timer = null;
-  let step = 0;
-  let nextTime = 0;
-  let enabled = false;
+  let buffer = null;
+  let loading = null;
+  let loadFailed = false;
 
-  function freq(name) {
-    return 440 * Math.pow(2, NOTES[name] / 12);
-  }
+  let enabled = false;
+  let nextStart = 0;
+  let timer = null;
+  let live = [];
 
   function ensureContext() {
     if (ctx) return true;
@@ -48,16 +30,81 @@ const Music = (function () {
     if (!AC) return false;
     ctx = new AC();
     master = ctx.createGain();
-    master.gain.value = 0.16;
+    master.gain.value = 0;
     master.connect(ctx.destination);
     return true;
   }
 
-  function voice(f, at, dur, type, vol, cutoff) {
+  // Older Safari only has the callback form of decodeAudioData.
+  function decode(data) {
+    return new Promise(function (resolve, reject) {
+      const maybe = ctx.decodeAudioData(data, resolve, reject);
+      if (maybe && typeof maybe.then === 'function') maybe.then(resolve, reject);
+    });
+  }
+
+  function load() {
+    if (buffer || loadFailed) return Promise.resolve(buffer);
+    if (loading) return loading;
+    loading = fetch(THEME_URL)
+      .then(function (res) {
+        if (!res.ok) throw new Error('theme ' + res.status);
+        return res.arrayBuffer();
+      })
+      .then(decode)
+      .then(function (decoded) {
+        buffer = decoded;
+        return buffer;
+      })
+      .catch(function () {
+        // A missing or undecodable track must not take the game down with it.
+        loadFailed = true;
+        return null;
+      });
+    return loading;
+  }
+
+  function scheduleLap(at) {
+    const source = ctx.createBufferSource();
+    const gain = ctx.createGain();
+    source.buffer = buffer;
+
+    const end = at + buffer.duration;
+    gain.gain.setValueAtTime(0.0001, at);
+    gain.gain.linearRampToValueAtTime(1, at + OVERLAP);
+    gain.gain.setValueAtTime(1, end - OVERLAP);
+    gain.gain.linearRampToValueAtTime(0.0001, end);
+
+    source.connect(gain);
+    gain.connect(master);
+    source.start(at);
+    source.stop(end + 0.05);
+
+    live.push(source);
+    source.onended = function () {
+      const i = live.indexOf(source);
+      if (i !== -1) live.splice(i, 1);
+    };
+
+    // The next lap starts before this one ends; that overlap is the crossfade.
+    nextStart = end - OVERLAP;
+  }
+
+  function pump() {
+    if (!enabled || !buffer || !ctx) return;
+    while (nextStart < ctx.currentTime + SCHEDULE_AHEAD) scheduleLap(nextStart);
+  }
+
+  function stopAllSources() {
+    live.forEach(function (s) { try { s.stop(); } catch (e) { /* already stopped */ } });
+    live = [];
+  }
+
+  function voice(freq, at, dur, type, vol, cutoff) {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = type;
-    osc.frequency.value = f;
+    osc.frequency.value = freq;
 
     let tail = gain;
     if (cutoff) {
@@ -69,58 +116,56 @@ const Music = (function () {
     }
 
     gain.gain.setValueAtTime(0.0001, at);
-    gain.gain.linearRampToValueAtTime(vol, at + 0.012);
+    gain.gain.linearRampToValueAtTime(vol, at + 0.01);
     gain.gain.exponentialRampToValueAtTime(0.0001, at + dur);
 
     osc.connect(gain);
-    tail.connect(master);
+    tail.connect(ctx.destination); // effects bypass the music fader
     osc.start(at);
     osc.stop(at + dur + 0.02);
   }
 
-  function scheduleStep(i, at) {
-    const lead = LEAD[i % LEAD.length];
-    if (lead) voice(freq(lead), at, STEP * 1.6, 'square', 0.5, 2200);
-    const bass = BASS[i % BASS.length];
-    if (bass) voice(freq(bass), at, STEP * 3.2, 'triangle', 0.9, 700);
-  }
-
-  function tick() {
-    if (!ctx) return;
-    while (nextTime < ctx.currentTime + LOOKAHEAD) {
-      scheduleStep(step, nextTime);
-      nextTime += STEP;
-      step = (step + 1) % LEAD.length;
-    }
-  }
-
   return {
     isOn: function () { return enabled; },
+    isReady: function () { return !!buffer; },
+    failed: function () { return loadFailed; },
+
+    // Safe to call early; it only warms the cache.
+    preload: function () {
+      if (ensureContext()) load();
+    },
 
     // Must be called from inside a user gesture the first time.
     start: function () {
       if (!ensureContext()) return false;
       if (ctx.state === 'suspended') ctx.resume();
-      if (enabled) return true;
       enabled = true;
-      step = 0;
-      nextTime = ctx.currentTime + 0.08;
+
       master.gain.cancelScheduledValues(ctx.currentTime);
-      master.gain.setValueAtTime(0.0001, ctx.currentTime);
-      master.gain.linearRampToValueAtTime(0.16, ctx.currentTime + 0.4);
-      timer = setInterval(tick, 60);
-      tick();
+      master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
+      master.gain.linearRampToValueAtTime(VOLUME, ctx.currentTime + 0.6);
+
+      load().then(function (ok) {
+        if (!ok || !enabled) return;
+        if (!timer) {
+          nextStart = ctx.currentTime + 0.05;
+          pump();
+          timer = setInterval(pump, 1000);
+        }
+      });
       return true;
     },
 
     stop: function () {
-      if (!enabled || !ctx) return;
+      if (!ctx) return;
       enabled = false;
       master.gain.cancelScheduledValues(ctx.currentTime);
       master.gain.setValueAtTime(master.gain.value, ctx.currentTime);
-      master.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.25);
+      master.gain.linearRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
       clearInterval(timer);
       timer = null;
+      // Let the fade finish before tearing the sources down.
+      setTimeout(function () { if (!enabled) stopAllSources(); }, 500);
     },
 
     toggle: function () {
@@ -128,12 +173,20 @@ const Music = (function () {
       return this.start();
     },
 
-    // Short blip for menu confirmations.
     blip: function (up) {
       if (!ensureContext()) return;
       if (ctx.state === 'suspended') ctx.resume();
-      const at = ctx.currentTime + 0.001;
-      voice(up ? 880 : 520, at, 0.07, 'square', 0.35, 3000);
+      voice(up ? 880 : 520, ctx.currentTime + 0.001, 0.07, 'square', 0.22, 3000);
+    },
+
+    // The boot chime: two notes, the second ringing on underneath.
+    chime: function () {
+      if (!ensureContext()) return;
+      if (ctx.state === 'suspended') ctx.resume();
+      const t = ctx.currentTime + 0.02;
+      voice(523.25, t, 0.16, 'triangle', 0.30, 4000);
+      voice(1046.5, t + 0.13, 1.25, 'triangle', 0.26, 5000);
+      voice(1568.0, t + 0.13, 1.10, 'sine', 0.11, 6000);
     },
   };
 })();

@@ -81,6 +81,12 @@ const MAPS = {
     ],
     objects: [
       { x: 1, y: 3, t: 'stairs' },
+      { x: 1, y: 2, t: 'windowNight', dy: -16 },
+      { x: 2, y: 3, t: 'bookshelf' },
+      { x: 6, y: 4, t: 'table' },
+      { x: 6, y: 4, t: 'mug', dy: -7 },
+      { x: 10, y: 2, t: 'frame', dy: -16 },
+      { x: 13, y: 2, t: 'clock', dy: -16 },
       { x: 3, y: 2, t: 'frame', dy: -16 },
       // No dy: a hearth has to meet the floor, unlike the framed pictures.
       { x: 4, y: 2, t: 'fireplace' },
@@ -98,8 +104,13 @@ const MAPS = {
     // The world map is a 32x32 decal rather than four tiles, so it can sit
     // high on the wall while staying reachable from the floor below.
     decals: [{ x: 7, y: 2, dy: -24, t: 'worldmap' }],
-    solid: ['13,3', '14,3', '4,4', '2,5', '10,5', '14,8', '1,9'],
+    solid: ['13,3', '14,3', '4,4', '2,5', '10,5', '14,8', '1,9', '2,3', '6,4'],
     interact: {
+      '1,2': 'windowHouse',
+      '2,3': 'shelfRoles',
+      '6,4': 'warmCoffee',
+      '10,2': 'trialCard',
+      '13,2': 'clockHouse',
       '3,2': 'sampler',
       '4,2': 'fireplace',
       '7,2': 'southAmerica',

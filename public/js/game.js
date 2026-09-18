@@ -104,6 +104,26 @@
     drawText(text, Math.round((W - textWidth(text)) / 2), y, colorIndex);
   }
 
+  // Same font, drawn as blocks of scale x scale pixels, for the boot wordmark.
+  function drawTextScaled(text, x, y, colorIndex, scale) {
+    for (let i = 0; i < text.length; i++) {
+      const rows = glyphFor(text[i]);
+      for (let ry = 0; ry < 8; ry++) {
+        const bits = rows[ry];
+        if (!bits) continue;
+        for (let bx = 0; bx < 8; bx++) {
+          if (!(bits & (0x80 >> bx))) continue;
+          fillRect(x + (i * GLYPH_ADVANCE + bx) * scale, y + ry * scale, scale, scale, colorIndex);
+        }
+      }
+    }
+  }
+
+  function drawTextScaledCentered(text, y, colorIndex, scale) {
+    const w = text.length * GLYPH_ADVANCE * scale;
+    drawTextScaled(text, Math.round((W - w) / 2), y, colorIndex, scale);
+  }
+
   // Classic ordered dither, used for screen transitions.
   const BAYER = [
     [0, 8, 2, 10],
@@ -196,7 +216,8 @@
     if (gestureSeen) return;
     gestureSeen = true;
     // Safari only allows the audio context to exist after a real interaction.
-    if (musicWanted) Music.start();
+    // Open it now and fetch the theme, but stay silent until the boot chime.
+    Music.preload();
   }
 
   let musicWanted = true;
@@ -205,7 +226,22 @@
 
   const flags = { hasMessage: false, seen: Object.create(null) };
 
-  let mode = 'title'; // title | play | dialogue | choice | fadeout | ending
+  // power | boot | title | play | dialogue | choice | fadeout | ending
+  let mode = 'power';
+
+  // Boot sequence timing, in frames. The handheld took about two seconds to
+  // slide its logo down and ring, and it is the wait that makes it feel right.
+  const BOOT_SCROLL = 78;
+  const BOOT_SETTLE = 22;
+  const BOOT_AFTER_CHIME = 100;
+  const LOGO_REST_Y = 30;
+  // Far enough up that the wordmark underneath the mark is off-screen too, so
+  // the whole block slides in as one piece.
+  const LOGO_START_Y = -72;
+
+  let bootT = 0;
+  let chimeRung = false;
+  let userPalette = 'cozy';
   let currentMapId = 'office';
   let map = null;
 
@@ -344,7 +380,10 @@
   function updatePlay() {
     if (consume('a')) { interact(); return; }
     if (consume('music')) { musicWanted = Music.toggle(); }
-    if (consume('palette')) applyPalette(paletteName === 'cozy' ? 'dmg' : 'cozy');
+    if (consume('palette')) {
+      userPalette = paletteName === 'cozy' ? 'dmg' : 'cozy';
+      applyPalette(userPalette);
+    }
 
     if (player.moving) {
       player.t++;
@@ -527,6 +566,52 @@
     drawChar('*', cx, BOX_TOP + 26, 3);
   }
 
+  // The console is off. Browsers will not make a sound until someone touches
+  // the page, so the chime needs this one press to exist at all.
+  function renderPower() {
+    clear(3);
+    // Steady text, blinking marker: a dark screen that is blank half the time
+    // reads as broken rather than as waiting.
+    const label = isTouch ? 'TAP TO POWER ON' : 'PRESS ENTER TO POWER ON';
+    drawTextCentered(label, 68, 1);
+    if ((frame >> 4) & 1) {
+      const x = Math.round((W - textWidth(label)) / 2) - 10;
+      drawChar('*', x, 68, 2);
+    }
+  }
+
+  function updateBoot() {
+    bootT++;
+
+    if (bootT === BOOT_SCROLL + BOOT_SETTLE && !chimeRung) {
+      chimeRung = true;
+      Music.chime();
+    }
+
+    const done = BOOT_SCROLL + BOOT_SETTLE + BOOT_AFTER_CHIME;
+    // Let people who have seen it once get past it.
+    if (bootT >= done || (bootT > BOOT_SCROLL + BOOT_SETTLE + 20 && consume('a'))) {
+      applyPalette(userPalette);
+      mode = 'title';
+      clearPressed();
+      if (musicWanted) Music.start();
+    }
+  }
+
+  function renderBoot() {
+    clear(0);
+
+    const k = Math.min(1, bootT / BOOT_SCROLL);
+    const logoY = Math.round(LOGO_START_Y + (LOGO_REST_Y - LOGO_START_Y) * k);
+
+    drawGrid(DECALS.coconut40, 60, logoY);
+    drawTextScaledCentered('COCONUT', logoY + 46, 3, 2);
+
+    if (chimeRung) {
+      drawTextCentered('Licensed by Coconut', 116, 2);
+    }
+  }
+
   function renderTitle() {
     clear(0);
     drawGrid(DECALS.palm, 64, 18);
@@ -569,7 +654,20 @@
   function tick() {
     frame++;
 
-    if (mode === 'title') {
+    if (mode === 'power') {
+      if (consume('a')) {
+        clearPressed();
+        // The boot screen is the handheld's own, so it wears the handheld's green.
+        applyPalette('dmg');
+        bootT = 0;
+        chimeRung = false;
+        mode = 'boot';
+      }
+      renderPower();
+    } else if (mode === 'boot') {
+      updateBoot();
+      renderBoot();
+    } else if (mode === 'title') {
       if (consume('a')) {
         clearPressed();
         mode = 'play';
@@ -641,7 +739,8 @@
       (!window.matchMedia && 'ontouchstart' in window);
     if (isTouch) document.body.classList.add('touch');
 
-    applyPalette('cozy');
+    userPalette = 'cozy';
+    applyPalette(userPalette);
     loadMap('office');
     bindTouchControls();
     fitScreen();
@@ -684,6 +783,12 @@
           fadeDir = 0;
         },
         face: function (d) { player.dir = d; },
+        boot: function (t) {
+          applyPalette('dmg');
+          mode = 'boot';
+          bootT = t === undefined ? 0 : t;
+          chimeRung = bootT >= BOOT_SCROLL + BOOT_SETTLE;
+        },
         act: function () { mode = 'play'; interact(); },
         skip: function () { mode = 'play'; pages = []; afterDialogue = null; },
       };
