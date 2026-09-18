@@ -5,7 +5,7 @@
 // them on its own, so write plain sentences here.
 
 const BOOK_A_CALL_URL =
-  'https://calendly.com/adell-coconutva/coconut-discovery-call?utm_source=the_mission';
+  'https://calendly.com/conor-coconutva/30min?utm_source=the_mission';
 
 const SCRIPT = {
   intro: [
