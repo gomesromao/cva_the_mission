@@ -14,10 +14,14 @@ It opens the way the handheld did: press to power on, the Coconut mark slides
 down the screen, it rings, and then the title. The mark is converted straight
 from the brand PNG rather than redrawn by eye.
 
-**Music:** `public/audio/theme.mp3` is *Midnight Pixel Path* by gomesromao, the
-first 63 seconds of the original, before the vocal comes in. It is looped with a
-crossfade rather than with `loop=true`, because its tail sits about 12dB below
-its head and butting the two together puts an audible jump every lap.
+**Music:** `public/audio/theme.mp3` is *Pixel Cozy* by gomesromao, an
+instrumental track cut just before its own fade-out at 2:54. It is looped with a
+crossfade rather than with `loop=true`, so the seam joins two passages at full
+level instead of dropping into the fade.
+
+The MUSIC control is a state readout, not a command: it says OFF until something
+is really playing, and it updates whether you use the button, the M key or the
+gramophone in the living room.
 
 ## Running it locally
 
@@ -37,9 +41,10 @@ you go straight into the game.
 
 ## The password gate
 
-The game is private. `middleware.js` redirects every request to `/login.html`
-until the visitor has a valid cookie, and `api/login.js` issues that cookie only
-for the correct password.
+The game is private. `middleware.js` redirects every request to `/login` until
+the visitor has a valid cookie, and `api/login.js` issues that cookie only for
+the correct password. The login page, the logo it shows and the login endpoint
+are the only things served without one.
 
 **The password is never in this repo.** It lives in a single Vercel environment
 variable, and both halves of the gate derive the same cookie value from it
@@ -79,7 +84,8 @@ what you have not found.
 ```
 public/
   index.html        game shell
-  login.html        password page (the only ungated page)
+  login.html        password page, served at /login (ungated)
+  logo.png          brand mark, used as the favicon (ungated)
   style.css         page chrome and the touch controls
   audio/theme.mp3   the looping theme
   js/font.js        8x8 bitmap font, authored as hex

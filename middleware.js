@@ -6,8 +6,10 @@
 // can stay public.
 
 export const config = {
-  // Everything is gated except the login page and the endpoint that checks it.
-  matcher: ['/((?!api/login|login\\.html).*)'],
+  // Everything is gated except the login page, the mark it shows in its tab,
+  // and the endpoint that checks the password. cleanUrls serves login.html at
+  // /login, so both spellings have to be let through.
+  matcher: ['/((?!api/login|login|logo\\.png|favicon\\.ico).*)'],
 };
 
 const STAMP = 'the-mission-gate-v1';
@@ -50,7 +52,7 @@ export default async function middleware(request) {
   if (match && sameString(match[1], await expectedToken(secret))) return;
 
   const url = new URL(request.url);
-  url.pathname = '/login.html';
+  url.pathname = '/login';
   url.search = '';
   return Response.redirect(url, 302);
 }

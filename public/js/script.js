@@ -85,6 +85,10 @@ const SCRIPT = {
     'The needle drops.',
     'The room gets warmer.',
   ],
+  gramophoneBroken: [
+    'You wind the gramophone. Nothing comes out of it.',
+    'The record never arrived.',
+  ],
   gramophoneOff: [
     'You lift the needle.',
     'The room goes quiet.',

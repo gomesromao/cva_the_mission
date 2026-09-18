@@ -1,8 +1,9 @@
 // Music and sound.
 //
-// The theme is a real track loaded once and looped with a crossfade rather than
-// with loop=true: its tail is around 12dB quieter than its head, so butting the
-// two together would put an audible jump every lap. Overlapping them hides it.
+// The theme is a real track, decoded once and looped with a crossfade rather
+// than with loop=true. The file is cut just before the track's own fade-out so
+// the seam joins two passages at full level, and the two-second overlap covers
+// both that join and the gentle ramp the track opens with.
 //
 // Safari will not let an AudioContext exist outside a user gesture, so the
 // context is created on the first key press or tap and resumed there too.
@@ -23,6 +24,13 @@ const Music = (function () {
   let nextStart = 0;
   let timer = null;
   let live = [];
+  let listener = null;
+
+  // Anything that can change what the music is doing says so, so the on/off
+  // control never claims something that is not true.
+  function announce() {
+    if (listener) listener();
+  }
 
   function ensureContext() {
     if (ctx) return true;
@@ -54,11 +62,13 @@ const Music = (function () {
       .then(decode)
       .then(function (decoded) {
         buffer = decoded;
+        announce();
         return buffer;
       })
       .catch(function () {
         // A missing or undecodable track must not take the game down with it.
         loadFailed = true;
+        announce();
         return null;
       });
     return loading;
@@ -129,6 +139,9 @@ const Music = (function () {
     isOn: function () { return enabled; },
     isReady: function () { return !!buffer; },
     failed: function () { return loadFailed; },
+    // Wanted, but the track has not arrived yet.
+    isLoading: function () { return enabled && !buffer && !loadFailed; },
+    onChange: function (fn) { listener = fn; },
 
     // Safe to call early; it only warms the cache.
     preload: function () {
@@ -153,6 +166,7 @@ const Music = (function () {
           timer = setInterval(pump, 1000);
         }
       });
+      announce();
       return true;
     },
 
@@ -166,6 +180,7 @@ const Music = (function () {
       timer = null;
       // Let the fade finish before tearing the sources down.
       setTimeout(function () { if (!enabled) stopAllSources(); }, 500);
+      announce();
     },
 
     toggle: function () {

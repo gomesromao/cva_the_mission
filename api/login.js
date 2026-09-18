@@ -60,7 +60,7 @@ export default async function handler(req, res) {
     // Slow down repeated guesses a little without holding the function open.
     await new Promise((r) => setTimeout(r, 700));
     res.statusCode = 302;
-    res.setHeader('location', '/login.html?e=1');
+    res.setHeader('location', '/login?e=1');
     res.end();
     return;
   }

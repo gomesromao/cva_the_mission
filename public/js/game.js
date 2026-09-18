@@ -222,6 +222,33 @@
 
   let musicWanted = true;
 
+  // The control reads out what the music is actually doing. It says OFF until
+  // something is really playing, because nothing can play before the first
+  // press, and it updates from every route into it: this button, the M key and
+  // the gramophone downstairs.
+  function syncMusicButton() {
+    const btn = document.getElementById('music-toggle');
+    if (!btn) return;
+
+    if (Music.failed()) {
+      btn.textContent = 'MUSIC: OFF';
+      btn.disabled = true;
+      btn.title = 'The theme could not be loaded.';
+      btn.setAttribute('aria-pressed', 'false');
+      return;
+    }
+
+    const on = Music.isOn();
+    btn.textContent = Music.isLoading() ? 'MUSIC: …' : (on ? 'MUSIC: ON' : 'MUSIC: OFF');
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+
+  function toggleMusic() {
+    musicWanted = Music.toggle();
+    syncMusicButton();
+    return musicWanted;
+  }
+
   // -------------------------------------------------------------- game state
 
   const flags = { hasMessage: false, seen: Object.create(null) };
@@ -344,9 +371,8 @@
       });
     },
     gramophone: function () {
-      const on = Music.toggle();
-      musicWanted = on;
-      say(on ? SCRIPT.gramophoneOn : SCRIPT.gramophoneOff);
+      if (Music.failed()) { say(SCRIPT.gramophoneBroken); return; }
+      say(toggleMusic() ? SCRIPT.gramophoneOn : SCRIPT.gramophoneOff);
     },
     door: function () {
       say(SCRIPT.doorPrompt, function () {
@@ -380,12 +406,6 @@
 
   function updatePlay() {
     if (consume('a')) { interact(); return; }
-    if (consume('music')) { musicWanted = Music.toggle(); }
-    if (consume('palette')) {
-      const i = PALETTE_ORDER.indexOf(paletteName);
-      userPalette = PALETTE_ORDER[(i + 1) % PALETTE_ORDER.length];
-      applyPalette(userPalette);
-    }
 
     if (player.moving) {
       player.t++;
@@ -715,7 +735,7 @@
       applyPalette(userPalette);
       mode = 'title';
       clearPressed();
-      if (musicWanted) Music.start();
+      if (musicWanted) { Music.start(); syncMusicButton(); }
     }
   }
 
@@ -774,6 +794,14 @@
 
   function tick() {
     frame++;
+
+    // Music and palette work on every screen, not only while walking around.
+    if (consume('music')) toggleMusic();
+    if (consume('palette')) {
+      const i = PALETTE_ORDER.indexOf(paletteName);
+      userPalette = PALETTE_ORDER[(i + 1) % PALETTE_ORDER.length];
+      applyPalette(userPalette);
+    }
 
     if (mode === 'power') {
       if (consume('a')) {
@@ -882,10 +910,11 @@
     canvas.addEventListener('mousedown', function () { firstGesture(); setKey('a', true); });
     canvas.addEventListener('mouseup', function () { setKey('a', false); });
 
+    Music.onChange(syncMusicButton);
+    syncMusicButton();
     document.getElementById('music-toggle').addEventListener('click', function () {
       firstGesture();
-      musicWanted = Music.toggle();
-      this.textContent = musicWanted ? 'MUSIC ON' : 'MUSIC OFF';
+      toggleMusic();
     });
 
     // Opt-in inspection hook, used while building and testing the maps.
