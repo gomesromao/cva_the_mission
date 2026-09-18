@@ -1,8 +1,9 @@
+/* Coconut design tokens: navy-900, navy-500, green-500, green-100. */
 :root {
-  --ink: #2a1a12;
-  --dark: #7d5636;
-  --light: #cba36c;
-  --cream: #f4e7c8;
+  --ink: #07152b;
+  --dark: #2c4f8c;
+  --light: #6ec79a;
+  --cream: #def2e6;
 }
 
 * { box-sizing: border-box; }

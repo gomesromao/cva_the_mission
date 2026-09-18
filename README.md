@@ -62,7 +62,7 @@ variable and redeploy; everyone's saved cookie stops working immediately.
 | Arrow keys or WASD | walk |
 | Enter, Space or Z | talk, read, confirm |
 | M | music on/off |
-| P | switch palette (warm / classic green) |
+| P | cycle palette (Coconut / classic green / warm) |
 
 On phones and tablets an on-screen pad appears instead. The gramophone in the
 living room toggles the music too.

@@ -24,7 +24,7 @@
   const image = ctx2d.createImageData(W, H);
   const pixels = new Uint32Array(image.data.buffer);
 
-  let paletteName = 'cozy';
+  let paletteName = 'coconut';
   let palette = new Uint32Array(4);
 
   function applyPalette(name) {
@@ -241,7 +241,7 @@
 
   let bootT = 0;
   let chimeRung = false;
-  let userPalette = 'cozy';
+  let userPalette = 'coconut';
   let currentMapId = 'office';
   let map = null;
 
@@ -381,7 +381,8 @@
     if (consume('a')) { interact(); return; }
     if (consume('music')) { musicWanted = Music.toggle(); }
     if (consume('palette')) {
-      userPalette = paletteName === 'cozy' ? 'dmg' : 'cozy';
+      const i = PALETTE_ORDER.indexOf(paletteName);
+      userPalette = PALETTE_ORDER[(i + 1) % PALETTE_ORDER.length];
       applyPalette(userPalette);
     }
 
@@ -657,8 +658,9 @@
     if (mode === 'power') {
       if (consume('a')) {
         clearPressed();
-        // The boot screen is the handheld's own, so it wears the handheld's green.
-        applyPalette('dmg');
+        // The boot wears the brand's own mint, which is already the green a
+        // handheld boot screen wants to be.
+        applyPalette(userPalette);
         bootT = 0;
         chimeRung = false;
         mode = 'boot';
@@ -739,7 +741,7 @@
       (!window.matchMedia && 'ontouchstart' in window);
     if (isTouch) document.body.classList.add('touch');
 
-    userPalette = 'cozy';
+    userPalette = 'coconut';
     applyPalette(userPalette);
     loadMap('office');
     bindTouchControls();
@@ -784,7 +786,7 @@
         },
         face: function (d) { player.dir = d; },
         boot: function (t) {
-          applyPalette('dmg');
+          applyPalette(userPalette);
           mode = 'boot';
           bootT = t === undefined ? 0 : t;
           chimeRung = bootT >= BOOT_SCROLL + BOOT_SETTLE;

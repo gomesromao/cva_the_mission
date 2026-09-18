@@ -732,10 +732,19 @@ const DECALS = {
 // --------------------------------------------------------------------- palettes
 // Two four-tone sets, switchable in-game. Index 0 is the lightest.
 
+// The house ramp is the brand's own gradient, mint down to the navy the logo
+// is drawn in, taken from the Coconut design tokens rather than eyeballed.
+// cv-green-100 / cv-green-500 / cv-navy-500 / cv-navy-900.
+// Tone 3 is the navy the logo is drawn in; the steps above it are spaced by
+// brightness rather than by picking tokens straight off the ladder, because
+// two adjacent brand greens would collapse into one flat shape on screen.
 const PALETTES = {
-  cozy: ['#f4e7c8', '#cba36c', '#7d5636', '#2a1a12'],
+  coconut: ['#eaf5ee', '#8fd3b2', '#3f7f8c', '#07152b'],
   dmg: ['#e0f8d0', '#88c070', '#346856', '#081820'],
+  cozy: ['#f4e7c8', '#cba36c', '#7d5636', '#2a1a12'],
 };
+
+const PALETTE_ORDER = ['coconut', 'dmg', 'cozy'];
 
 // The world map above was drawn with a light ocean, which washes out against
 // the wallpaper it hangs on. Flip it once at load so the land reads light on a
