@@ -364,11 +364,16 @@
       }
     },
     stairs: function () {
-      if (!flags.hasMessage) { say(SCRIPT.stairsLocked); return; }
-      startFade(1, function () {
-        loadMap('house');
-        startFade(-1, null);
-      });
+      // Never locked. Requiring the message first strands anyone who does not
+      // realise the laptop is a thing you press ENTER at.
+      const descend = function () {
+        startFade(1, function () {
+          loadMap('house');
+          startFade(-1, null);
+        });
+      };
+      if (!flags.hasMessage) { say(SCRIPT.stairsEarly, descend); return; }
+      descend();
     },
     gramophone: function () {
       if (Music.failed()) { say(SCRIPT.gramophoneBroken); return; }

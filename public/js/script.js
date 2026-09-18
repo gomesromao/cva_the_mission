@@ -65,9 +65,11 @@ const SCRIPT = {
     'The message is still open.',
     '"Come downstairs."',
   ],
-  stairsLocked: [
-    'Downstairs is where the rest of your life is.',
-    'You will go in a minute. You always say a minute.',
+  // Shown when someone heads downstairs before opening the message. It never
+  // blocks them: the stairs work from the first second.
+  stairsEarly: [
+    'You go down without reading the message.',
+    'It will still be there. Things on that desk always are.',
   ],
 
   // -------------------------------------------------------------- the house
