@@ -11,7 +11,7 @@
 const Music = (function () {
   const THEME_URL = 'audio/theme.mp3';
   const OVERLAP = 2.0;      // seconds of crossfade at the seam
-  const VOLUME = 0.55;
+  const VOLUME = 0.27;      // background, not foreground
   const SCHEDULE_AHEAD = 4; // seconds
 
   let ctx = null;
