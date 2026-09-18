@@ -1,0 +1,7 @@
+{
+  "name": "cva-the-mission",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A short handheld-style browser game about finding time."
+}

@@ -1,0 +1,194 @@
+:root {
+  --ink: #2a1a12;
+  --dark: #7d5636;
+  --light: #cba36c;
+  --cream: #f4e7c8;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--ink);
+  color: var(--cream);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+  overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* dvh keeps the layout honest when Safari's toolbars slide away */
+  min-height: 100vh;
+  min-height: 100dvh;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: 8px;
+}
+
+#shell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+#screen {
+  display: block;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  background: var(--ink);
+  border: 3px solid var(--dark);
+  border-radius: 2px;
+  box-shadow: 0 0 0 3px var(--ink), 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+
+/* --------------------------------------------------------------- bottom bar */
+
+#bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--light);
+}
+
+#music-toggle {
+  font: inherit;
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--cream);
+  background: var(--dark);
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+
+#music-toggle:active { transform: translateY(1px); }
+
+/* ------------------------------------------------------------ touch controls */
+
+#controls { display: none; }
+
+body.touch #controls {
+  display: flex;
+  width: min(100%, 420px);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  gap: 24px;
+}
+
+body.touch .hint { display: none; }
+
+.dpad {
+  position: relative;
+  width: 132px;
+  height: 132px;
+}
+
+.pad {
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--ink);
+  background: var(--dark);
+  border-radius: 3px;
+  padding: 0;
+}
+
+.pad.up { left: 44px; top: 0; }
+.pad.down { left: 44px; top: 88px; }
+.pad.left { left: 0; top: 44px; }
+.pad.right { left: 88px; top: 44px; }
+
+.pad::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border: 7px solid transparent;
+}
+
+.pad.up::after { transform: translate(-50%, -70%); border-bottom-color: var(--cream); }
+.pad.down::after { transform: translate(-50%, -30%); border-top-color: var(--cream); }
+.pad.left::after { transform: translate(-70%, -50%); border-right-color: var(--cream); }
+.pad.right::after { transform: translate(-30%, -50%); border-left-color: var(--cream); }
+
+.pad.held, .abtn.held { background: var(--light); }
+
+.abtn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 3px solid var(--ink);
+  background: var(--dark);
+  color: var(--cream);
+  font: inherit;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+
+/* ------------------------------------------------------------- ending button */
+
+#ending {
+  display: none;
+  justify-content: center;
+}
+
+#ending.visible { display: flex; }
+
+#cta {
+  display: inline-block;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--cream);
+  border: 4px solid var(--ink);
+  box-shadow: 6px 6px 0 var(--dark);
+  padding: 18px 40px;
+  animation: nudge 1.6s ease-in-out infinite;
+}
+
+#cta:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--dark);
+}
+
+@keyframes nudge {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #cta { animation: none; }
+}
+
+/* ------------------------------------------------------------------- errors */
+
+#boot-error {
+  display: none;
+  position: fixed;
+  inset: 12px;
+  overflow: auto;
+  margin: 0;
+  padding: 14px;
+  background: #3b0d0d;
+  color: #ffd9d9;
+  font-size: 12px;
+  white-space: pre-wrap;
+  border: 2px solid #ff6b6b;
+}
