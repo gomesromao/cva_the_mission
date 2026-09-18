@@ -1,6 +1,13 @@
 // Every line of text in the game. Kept apart from the engine so the copy can be
 // edited without touching game logic.
 //
+// Voice: short, dry, spoken. Contractions everywhere. It is a handheld game,
+// not a novel, so nothing here should sound narrated.
+//
+// Two things stay word for word no matter what: the three wins on the sampler
+// and the customer quote on the armchair. Those are real and belong to the
+// people who said them.
+//
 // Each entry is an array of paragraphs. The dialogue box wraps and paginates
 // them on its own, so write plain sentences here.
 
@@ -9,178 +16,177 @@ const BOOK_A_CALL_URL =
 
 const SCRIPT = {
   intro: [
-    '11:47 PM.',
-    'You are still at the desk. You have been here since the sun was up.',
-    'There was something you kept meaning to do today. You cannot remember what it was.',
+    '11:47 PM. Still at the desk. Classic.',
+    "You meant to do something today. No idea what. It's gone.",
     'FIND TIME.',
   ],
 
   // ------------------------------------------------------------- the office
   clock: [
     '11:47 PM.',
-    'The day is gone and you never decided where it went.',
+    "The whole day's gone and you never once picked where it went.",
   ],
   calendar: [
-    'Tomorrow: nine meetings.',
-    'None of them are the work. The work waits for the weekend. The weekend waits for you.',
+    'Nine meetings tomorrow.',
+    'Zero of them are the actual work. That gets the weekend. If the weekend survives.',
   ],
   notes: [
     'Sticky notes, three deep.',
-    "One of them says 'HIRE SOMEONE'.",
-    'You wrote it four months ago. The ink has faded. You have not.',
+    'One says HIRE SOMEONE.',
+    "You wrote that four months ago. The ink's faded. You haven't.",
   ],
   window: [
-    'Dark outside.',
-    'It was dark when you sat down, too. Somewhere in between there was an entire day.',
+    'Dark out. It was dark when you sat down too.',
+    "Somewhere in the middle there was a whole day. You'll have to take our word for it.",
   ],
   mug: [
     'Cold coffee.',
-    'You poured it at 3 PM to save time. You never drank it. It saved nothing.',
+    'You made it at 3 to save time. Never touched it. Great plan.',
   ],
   monitor: [
     '412 unread. 38 need an answer.',
     'Six of them actually need YOU.',
-    'You have never had time to find which six.',
+    "You've never had time to work out which six.",
   ],
   desk: [
     'Your desk.',
-    "Everything on it is somebody else's emergency.",
+    "Every single thing on it is somebody else's emergency.",
   ],
   chair: [
-    'The chair is warm.',
-    'It has been warm for eleven hours.',
+    "The chair's warm.",
+    'Eleven hours warm.',
   ],
   plant: [
-    'The plant is thriving.',
-    'Someone else waters it. Imagine that.',
+    "The plant's thriving.",
+    'Somebody else waters it. Imagine.',
   ],
   laptop: [
     'One new message.',
     'FROM: COCONUT',
-    '"You are not going to find more hours. Nobody in history has found more hours."',
-    '"But the hours you spend on work that was never yours? Those you can have back."',
+    '"You\'re not going to find more hours. Nobody ever has."',
+    '"But the hours you spend on work that was never yours? You can have those back."',
     '"Come downstairs."',
   ],
   laptopAgain: [
-    'The message is still open.',
-    '"Come downstairs."',
+    'Still open.',
+    'Still says come downstairs.',
   ],
   // Shown when someone heads downstairs before opening the message. It never
   // blocks them: the stairs work from the first second.
   stairsEarly: [
-    'You go down without reading the message.',
-    'It will still be there. Things on that desk always are.',
+    'Down you go, message unread.',
+    "It'll keep. Things on that desk always do.",
   ],
 
   // -------------------------------------------------------------- the house
   fireplace: [
-    'A fire someone else laid.',
-    'It has been burning all evening and you were upstairs for every minute of it.',
+    "Somebody lit this. It's been going all evening.",
+    'You were upstairs for every minute of it.',
   ],
   armchair: [
     'The good chair.',
     'You forgot this house had a good chair.',
-    "There is a note on the arm: 'I would recommend Coconut VA to anyone that wants help buying back their time. I have worked with my VA for 3 years.'",
-    'Signed, Bruce H.',
+    'There\'s a note on the arm: "I would recommend Coconut VA to anyone that wants help buying back their time. I have worked with my VA for 3 years."',
+    'Bruce H.',
   ],
   gramophoneOn: [
-    'The needle drops.',
-    'The room gets warmer.',
-  ],
-  gramophoneBroken: [
-    'You wind the gramophone. Nothing comes out of it.',
-    'The record never arrived.',
+    'Needle down.',
+    'The room warms up a little.',
   ],
   gramophoneOff: [
-    'You lift the needle.',
-    'The room goes quiet.',
+    'Needle up.',
+    'Quiet again.',
+  ],
+  gramophoneBroken: [
+    'You wind it up. Nothing comes out.',
+    'The record never showed up.',
   ],
   sampler: [
     'Stitched into the frame:',
     '"A win for the client."',
     '"A win for the virtual professional."',
     '"A win for Coconut."',
-    'Underneath, in smaller thread: "If it does not create value for all three, we rethink it."',
+    'Smaller, underneath: "If it does not create value for all three, we rethink it."',
   ],
   philippines: [
     'A pin in the Philippines.',
-    '"This is the best source of virtual professionals in the world. English belongs to the workplace here, the training is real, and the work ethic is not a slogan."',
+    '"Best place on earth to find virtual professionals. English is just how work happens here, the training\'s real, and the work ethic isn\'t a slogan."',
     '"Most of our talent lives on these islands."',
   ],
   southAmerica: [
-    'A second pin, an ocean away.',
-    '"We run meetups in Brazil, where we sit down in person with engineers, technical specialists and operators who can work inside your company."',
-    '"Not a database. People we have actually met."',
+    'Another pin, an ocean over.',
+    '"We run meetups in Brazil. We sit down in person with engineers, specialists and operators who can work inside your company."',
+    '"Not a database. People we\'ve actually met."',
   ],
   worldmapEdge: [
-    'A world map, marked in two places.',
-    'Somebody has been travelling.',
+    'A world map with two pins in it.',
+    "Somebody's been travelling.",
   ],
   binder: [
-    'A training binder, well used.',
-    '"We run security and work-methodology training so our virtual professionals stay aligned with how the market actually works."',
-    '"We built these systems for ourselves first, which is why we know the pains and the advantages of every one of them."',
-    '"If you are at that stage too, just ask. We would be glad to share what we learned."',
+    'A training binder. Well used.',
+    '"We run security and work-methodology training so our virtual professionals stay lined up with how the market actually works."',
+    '"We built these systems for ourselves first, so we know exactly where each one hurts and where each one pays off."',
+    '"If you\'re at that stage too, just ask. Happy to share what we learned."',
   ],
   shelfEarly: [
-    'A shelf of small things, arranged by year.',
+    'A shelf of small things, sorted by year.',
     'AUGUST 2021. Eric Espinosa and Tyler Leber start Coconut.',
-    'THE FIRST SIX MONTHS: six figures. Nobody saw that coming, least of all them.',
+    'FIRST SIX MONTHS: six figures. Nobody saw that coming. Them least of all.',
   ],
   shelfNow: [
-    'The shelf continues.',
-    'TODAY: over 600 companies served. More than 100,000 verified professionals. 4.9 out of 5.',
+    'The shelf keeps going.',
+    'TODAY: 600+ companies. 100,000+ verified professionals. 4.9 out of 5.',
     'And one number nobody prints: the hours handed back to the people who own the companies.',
   ],
   photo: [
-    'A photograph of a family on a wooden deck. Three chairs, all of them taken.',
-    "On the back, in pencil: 'She moved out at 19. First in her family to.'",
+    'A family on a wooden deck. Three chairs, all taken.',
+    'Pencil on the back: "She moved out at 19. First in her family to."',
   ],
   coconut: [
-    'A coconut. On the floor. Inside your house.',
+    'A coconut. On the floor. In your house.',
     'You decide not to ask.',
   ],
   windowHouse: [
-    'The window down here looks out at the same night as the one upstairs.',
+    'Same night as the window upstairs.',
     'From down here it looks like weather. From up there it looked like a deadline.',
   ],
   clockHouse: [
-    'A clock down here too. Same time as the one on your office wall.',
-    'It feels later up there. It always does.',
+    'A clock down here too. Same time as the one in your office.',
+    'Feels later up there. Always does.',
   ],
   warmCoffee: [
-    'A second cup, still warm.',
+    'A second cup. Still warm.',
     'Somebody made this while you were upstairs not drinking the first one.',
   ],
   trialCard: [
-    'A card propped inside the frame, handwritten:',
+    'A card propped in the frame, handwritten:',
     '"First 40 hours are free. Month to month. No long contracts."',
-    '"We would rather you leave easily than stay somewhere stuck."',
+    '"We\'d rather you leave easy than stay somewhere stuck."',
   ],
   shelfRoles: [
-    'A shelf of binders, one per job.',
+    'A shelf of binders. One per job.',
     'Executive assistants. Digital marketers. Social media. Sales. Accounting.',
     'Front end, back end, full stack. Automation and AI. Designers.',
-    'Every one of them is something you have been doing yourself at midnight.',
+    "Every one of them is something you've been doing yourself at midnight.",
   ],
 
   // --------------------------------------------------------------- the door
   doorPrompt: [
     'The front door.',
-    'It is morning out there, which makes no sense, and also makes perfect sense.',
+    "It's morning out there, which makes no sense and also makes perfect sense.",
   ],
   doorQuestion: 'Leave the desk behind?',
   doorRefuse: [
-    'Not yet, then.',
-    'The desk is still up there. It is very patient.',
+    'Not yet then.',
+    "The desk is still up there. It's very patient.",
   ],
 
   ending: [
     'You open the door.',
     'The time was never hiding somewhere in the day.',
     'It was inside the work that was never yours to do.',
-    'There is someone who does that work better than you, and who wants it.',
-    'That is the whole mission.',
+    'Somebody out there does that work better than you. And wants it.',
+    "That's the whole mission.",
   ],
 };
 
